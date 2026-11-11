@@ -111,7 +111,7 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     <div class="preview-caption">تصویر نهایی همین‌جاست؛ برای ارسال، دانلود یا اشتراک‌گذاری رو انتخاب کن.</div>
     <div id="previewStatus" class="status" role="status" aria-live="polite"></div>
     <div class="preview-wrap"><canvas id="reportCanvas" width="1080" height="1350" aria-label="پیش‌نمایش تصویر گزارش کار روزانه"></canvas><img id="reportImageView" alt="تصویر نهایی گزارش؛ برای ذخیره می‌توانی روی آن چند لحظه نگه داری" draggable="true"></div>
-    <div class="preview-actions"><button class="btn btn-yellow" type="button" id="downloadImage">⬇ دانلود JPEG</button><button class="btn btn-secondary" type="button" id="shareImage">↗ اشتراک‌گذاری</button></div>
+    <div class="preview-actions"><button class="btn btn-yellow" type="button" id="downloadImage">⬇ دانلود JPEG</button><button class="btn btn-secondary" type="button" id="shareImage">↗ اشتراک‌گذاری</button><button class="btn btn-primary" type="button" id="openExternalBrowser" style="grid-column:1/-1">🌐 باز کردن گزارش در مرورگر</button></div>
     <p class="hint" id="previewHint">برای ذخیرهٔ عکس، «دانلود JPEG» رو بزن؛ برای فرستادن مستقیم به پیام‌رسان، «اشتراک‌گذاری» رو انتخاب کن.</p>
   </section>
 </div>
@@ -382,8 +382,18 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
   }
   function loadDraft() {
     try {
-      const raw=localStorage.getItem(draftStorageKey); if(!raw) return false;
-      const state=JSON.parse(raw); if(!state || typeof state!=='object') return false;
+      let state=null;
+      // A report can be carried to the external browser in the URL fragment.
+      // Fragments are not sent to the hosting server.
+      const match=location.hash.match(/(?:^#|&)vant-report=([^&]+)/);
+      if(match) {
+        try { state=JSON.parse(decodeURIComponent(match[1])); } catch(e) { state=null; }
+      }
+      if(!state) {
+        const raw=localStorage.getItem(draftStorageKey); if(!raw) return false;
+        state=JSON.parse(raw);
+      }
+      if(!state || typeof state!=='object') return false;
       fields.forEach(id=>{ if(state[id]!==undefined) $(id).value=state[id]; });
       if (state.reportDate) {
         const oldDate=String(state.reportDate);
@@ -478,6 +488,35 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     startBlobDownload(lastBlob);
     showStatus('درخواست ذخیرهٔ تصویر انجام شد. پوشهٔ Downloads رو بررسی کن؛ اگر چیزی ذخیره نشد، روی خود عکس چند لحظه نگه دار و «ذخیره تصویر» رو انتخاب کن.');
   }
+  function openReportInExternalBrowser() {
+    if(!validData()) return;
+    const state={};
+    fields.forEach(id=>state[id]=$(id).value);
+    state.lessons=getLessons();
+    let encoded;
+    try {
+      encoded=encodeURIComponent(JSON.stringify(state));
+    } catch(e) {
+      showStatus('آماده‌سازی گزارش برای مرورگر انجام نشد؛ دوباره تلاش کن.',true);
+      return;
+    }
+    const url=location.href.split('#')[0]+'#vant-report='+encoded;
+    if(url.length>18000) {
+      showStatus('اطلاعات گزارش برای انتقال به مرورگر بیش از حد طولانی است؛ توضیحات اضافی را کوتاه کن.',true);
+      return;
+    }
+    try {
+      if(isTelegramMiniApp && tg && typeof tg.openLink==='function') {
+        tg.openLink(url,{try_instant_view:false});
+        showStatus('گزارش در مرورگر خارجی باز می‌شود؛ آنجا «ساخت پیش‌نمایش نهایی» و سپس دانلود را بزن.');
+      } else {
+        const opened=window.open(url,'_blank','noopener');
+        if(!opened) showStatus('مرورگر جلوی بازشدن پنجره را گرفت؛ این صفحه را در مرورگر اصلی باز کن.',true);
+      }
+    } catch(e) {
+      showStatus('بازکردن مرورگر خارجی ممکن نشد؛ از منوی تلگرام گزینهٔ بازکردن در مرورگر را انتخاب کن.',true);
+    }
+  }
   function shareReport() {
     // Immediate visible feedback confirms the tap reached this handler.
     showStatus('درخواست اشتراک‌گذاری دریافت شد؛ در حال بررسی امکان ارسال عکس…');
@@ -546,6 +585,7 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
   });
   $('downloadImage').addEventListener('click',downloadReport);
   $('shareImage').addEventListener('click',shareReport);
+  $('openExternalBrowser').addEventListener('click',openReportInExternalBrowser);
   $('clearForm').addEventListener('click',clearForm);
   fields.forEach(id=>$(id).addEventListener('input',changed));
   $('reportDate').value=currentJalaliDate();
