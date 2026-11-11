@@ -503,12 +503,15 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
       Promise.resolve(sharePromise).then(()=>{
         showStatus('پنجرهٔ اشتراک‌گذاری باز شد؛ برنامهٔ موردنظرت رو انتخاب کن.');
       }).catch(error=>{
-        if(error && error.name!=='AbortError') {
-          showStatus('اشتراک‌گذاری انجام نشد؛ دکمهٔ دانلود JPEG رو امتحان کن.',true);
-        }
+        if(error && error.name==='AbortError') return;
+        // If the Web Share sheet exists but rejects the file, fall back to
+        // downloading the JPEG instead of leaving the user with no result.
+        startBlobDownload(lastBlob);
+        showStatus('اشتراک‌گذاری در این محیط انجام نشد؛ درخواست ذخیرهٔ عکس صادر شد. پوشهٔ Downloads رو بررسی کن؛ اگر ذخیره نشد، روی خود عکس نگه دار و «ذخیره تصویر» رو بزن.',true);
       });
     } catch(error) {
-      showStatus('اشتراک‌گذاری انجام نشد؛ دکمهٔ دانلود JPEG رو امتحان کن.',true);
+      startBlobDownload(lastBlob);
+      showStatus('اشتراک‌گذاری در این محیط انجام نشد؛ درخواست ذخیرهٔ عکس صادر شد. پوشهٔ Downloads رو بررسی کن؛ اگر ذخیره نشد، روی خود عکس نگه دار و «ذخیره تصویر» رو بزن.',true);
     }
   }
   function clearForm() {
