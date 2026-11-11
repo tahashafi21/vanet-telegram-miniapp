@@ -47,6 +47,7 @@ main{max-width:1240px;margin:28px auto 55px;padding:0 26px}
 .divider{height:1px;background:var(--line);margin:26px 0 23px}.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:23px}.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:900;display:inline-flex;justify-content:center;align-items:center;gap:8px;transition:transform .15s,filter .15s}.btn:hover{filter:brightness(.97);transform:translateY(-1px)}.btn-primary{background:var(--blue);color:#fff;box-shadow:0 5px 0 #1539bd}.btn-secondary{background:#f0f2f8;color:#32384a}.btn-yellow{background:var(--yellow);color:#171717}.btn:focus-visible{outline:3px solid #aabaff;outline-offset:2px}
 .preview-panel{display:none;position:static}.preview-panel.is-visible{display:block}.preview-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.live-pill{font-size:10px;font-weight:900;color:#167c55;background:#e4f8ef;padding:5px 9px;border-radius:999px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}.live-pill:before{content:"";width:6px;height:6px;border-radius:50%;background:#1bb57a}
 .preview-caption{padding:13px 20px 0;font-size:12px;color:var(--muted)}.preview-wrap{padding:14px 18px 20px;background:linear-gradient(140deg,#f9faff,#f0f3fc)}#reportCanvas{display:block;width:100%;height:auto;border-radius:10px;box-shadow:0 9px 25px rgba(12,27,78,.15);background:#fff}
+#reportImageView{display:none;width:100%;height:auto;border-radius:10px;box-shadow:0 9px 25px rgba(12,27,78,.15);background:#fff;-webkit-touch-callout:default}
 .preview-actions{padding:0 18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:9px}.preview-actions .btn{font-size:12px;padding:11px 8px}.hint{font-size:11px;color:#7b8192;line-height:1.8;padding:0 20px 17px;margin:0}
 .status{display:none;margin-top:13px;padding:10px 12px;border-radius:11px;background:#e8fbf2;color:#13774d;font-size:12px;font-weight:700}.status.show{display:block}.status.error{background:#fff0f2;color:#c32038}.date-entry{display:flex;gap:7px;align-items:stretch}.date-entry input{flex:1;min-width:0}.today-button{border:1px solid #dce4ff;border-radius:11px;background:#eef2ff;color:var(--blue);padding:0 12px;font-size:12px;font-weight:900;white-space:nowrap}.today-button:hover{background:#e2e9ff}.workflow-note{display:flex;align-items:flex-start;gap:10px;padding:13px 15px;margin-bottom:22px;background:#f3f6ff;border:1px solid #e0e8ff;border-radius:14px;color:#404a68;font-size:12px}.workflow-note strong{display:block;color:#1c347e;margin-bottom:2px}.workflow-icon{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:10px;background:var(--yellow);color:#10131e;font-weight:1000}.preview-panel{scroll-margin-top:18px}
 .footer-note{max-width:1240px;margin:0 auto 30px;padding:0 26px;color:#7f8699;font-size:13px;display:flex;justify-content:center;gap:10px;text-align:center}.footer-note strong{color:#4d5570}
@@ -109,7 +110,7 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     <div class="panel-head"><div class="preview-head"><div><h2 id="previewHeading">گزارشت آماده‌ست!</h2><p>نگاهی بنداز و تصویر رو برای پشتیبان یا گروه وانت بفرست.</p></div></div><span class="live-pill">مرحلهٔ آخر</span></div>
     <div class="preview-caption">تصویر نهایی همین‌جاست؛ برای ارسال، دانلود یا اشتراک‌گذاری رو انتخاب کن.</div>
     <div id="previewStatus" class="status" role="status" aria-live="polite"></div>
-    <div class="preview-wrap"><canvas id="reportCanvas" width="1080" height="1350" aria-label="پیش‌نمایش تصویر گزارش کار روزانه"></canvas></div>
+    <div class="preview-wrap"><canvas id="reportCanvas" width="1080" height="1350" aria-label="پیش‌نمایش تصویر گزارش کار روزانه"></canvas><img id="reportImageView" alt="تصویر نهایی گزارش؛ برای ذخیره می‌توانی روی آن چند لحظه نگه داری" draggable="true"></div>
     <div class="preview-actions"><button class="btn btn-yellow" type="button" id="downloadImage">⬇ دانلود JPEG</button><button class="btn btn-secondary" type="button" id="shareImage">↗ اشتراک‌گذاری</button></div>
     <p class="hint" id="previewHint">برای ذخیرهٔ عکس، «دانلود JPEG» رو بزن؛ برای فرستادن مستقیم به پیام‌رسان، «اشتراک‌گذاری» رو انتخاب کن.</p>
   </section>
@@ -133,6 +134,7 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
   const ctx = canvas.getContext('2d');
   let lessonId = 0;
   let lastBlob = null;
+  let previewImageUrl = null;
   let saveTimer = null;
   const logo = new Image();
   logo.onload = () => { $('brandLogo').src = LOGO_DATA; renderReport(); };
@@ -354,6 +356,10 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     text(c,'گروه آموزشی وانت',540,footerY+31,23,'#fff',900,'center');
     text(c,'گزارش‌یار وانت',1000,height-54,13,'#5f78d0',700,'right');
     lastBlob=null;
+    if (previewImageUrl) { URL.revokeObjectURL(previewImageUrl); previewImageUrl=null; }
+    const imageView=$('reportImageView');
+    if (imageView) { imageView.removeAttribute('src'); imageView.style.display='none'; }
+    canvas.style.display='block';
   }
   function changed() {
     renderReport();
@@ -470,7 +476,7 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
       return;
     }
     startBlobDownload(lastBlob);
-    showStatus('درخواست ذخیرهٔ تصویر انجام شد. پوشهٔ Downloads رو بررسی کن.');
+    showStatus('درخواست ذخیرهٔ تصویر انجام شد. پوشهٔ Downloads رو بررسی کن؛ اگر چیزی ذخیره نشد، روی خود عکس چند لحظه نگه دار و «ذخیره تصویر» رو انتخاب کن.');
   }
   function shareReport() {
     if(!validData()) return;
@@ -480,13 +486,15 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     }
     if(typeof navigator.share!=='function' || typeof navigator.canShare!=='function' || typeof File!=='function') {
       startBlobDownload(lastBlob);
-      showStatus('اشتراک‌گذاری مستقیم در این محیط در دسترس نیست؛ تصویر برای ذخیره دانلود شد.');
+      showStatus('اشتراک‌گذاری مستقیم در این محیط در دسترس نیست؛ تصویر برای ذخیره دانلود شد. اگر دانلود شروع نشد، روی خود عکس نگه دار و «ذخیره تصویر» رو بزن.');
       return;
     }
     const file=new File([lastBlob],safeFilename(),{type:'image/jpeg'});
-    if(!navigator.canShare({files:[file]})) {
+    let canShareFile=false;
+    try { canShareFile=navigator.canShare({files:[file]}); } catch(e) {}
+    if(!canShareFile) {
       startBlobDownload(lastBlob);
-      showStatus('این محیط ارسال مستقیم فایل رو پشتیبانی نمی‌کنه؛ تصویر برای ذخیره دانلود شد.');
+      showStatus('این محیط ارسال مستقیم فایل رو پشتیبانی نمی‌کنه؛ تصویر برای ذخیره دانلود شد. اگر دانلود شروع نشد، روی خود عکس نگه دار و «ذخیره تصویر» رو بزن.');
       return;
     }
     // Call share() before any await/timer so the user activation is preserved.
@@ -516,7 +524,19 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     if(!validData()) return;
     const preview=$('previewPanel'); preview.classList.add('is-visible');
     await ensureBrandFont(); renderReport(); const blob=await canvasBlob();
-    if(blob){lastBlob=blob; updateTelegramControls(); if(isTelegramMiniApp && tg.HapticFeedback && typeof tg.HapticFeedback.notificationOccurred==='function') { try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {} } preview.scrollIntoView({behavior:'smooth',block:'start'}); showStatus('پیش‌نمایش آماده شد؛ حالا می‌تونی عکس رو دانلود یا اشتراک‌گذاری کنی.');}
+    if(blob){
+      lastBlob=blob;
+      if (previewImageUrl) URL.revokeObjectURL(previewImageUrl);
+      previewImageUrl=URL.createObjectURL(blob);
+      const imageView=$('reportImageView');
+      imageView.src=previewImageUrl;
+      imageView.style.display='block';
+      canvas.style.display='none';
+      updateTelegramControls();
+      if(isTelegramMiniApp && tg.HapticFeedback && typeof tg.HapticFeedback.notificationOccurred==='function') { try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {} }
+      preview.scrollIntoView({behavior:'smooth',block:'start'});
+      showStatus('پیش‌نمایش آماده شد؛ حالا می‌تونی عکس رو دانلود یا اشتراک‌گذاری کنی. اگر دانلود کار نکرد، روی خود عکس چند لحظه نگه دار و «ذخیره تصویر» رو بزن.');
+    }
     else showStatus('ساخت تصویر انجام نشد؛ دوباره تلاش کن.',true);
   });
   $('downloadImage').addEventListener('click',downloadReport);
