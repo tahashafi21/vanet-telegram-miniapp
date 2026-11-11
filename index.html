@@ -111,7 +111,7 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     <div id="previewStatus" class="status" role="status" aria-live="polite"></div>
     <div class="preview-wrap"><canvas id="reportCanvas" width="1080" height="1350" aria-label="پیش‌نمایش تصویر گزارش کار روزانه"></canvas></div>
     <div class="preview-actions"><button class="btn btn-yellow" type="button" id="downloadImage">⬇ دانلود JPEG</button><button class="btn btn-secondary" type="button" id="shareImage">↗ اشتراک‌گذاری</button></div>
-    <p class="hint" id="previewHint">اگر این صفحه رو از دکمهٔ ثبت گزارش در کیبورد ربات باز کرده باشی، دکمهٔ اصلی پایین تلگرام گزارش رو برای ربات می‌فرسته. دانلود و اشتراک‌گذاری تصویر هم همچنان در دسترسه.</p>
+    <p class="hint" id="previewHint">برای ذخیرهٔ عکس، «دانلود JPEG» رو بزن؛ برای فرستادن مستقیم به پیام‌رسان، «اشتراک‌گذاری» رو انتخاب کن.</p>
   </section>
 </div>
 </main>
@@ -397,42 +397,11 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     if (!isTelegramMiniApp || !tg) return;
     const previewVisible = $('previewPanel').classList.contains('is-visible');
     try {
-      if (tg.MainButton) {
-        tg.MainButton.setText('ارسال گزارش به ربات وانت');
-        tg.MainButton.setParams({color:'#2055f5',text_color:'#ffffff',is_active:true});
-        if (previewVisible) tg.MainButton.show(); else tg.MainButton.hide();
-      }
+      if (tg.MainButton) tg.MainButton.hide();
       if (tg.BackButton) {
         if (previewVisible) tg.BackButton.show(); else tg.BackButton.hide();
       }
     } catch(e) {}
-  }
-
-  function sendReportToBot() {
-    if (!isTelegramMiniApp || !tg || typeof tg.sendData !== 'function') {
-      showStatus('ارسال مستقیم در این روش اجرا در دسترس نیست؛ تصویر رو دانلود یا اشتراک‌گذاری کن.',true);
-      return;
-    }
-    if (!validData()) return;
-    const d = getData();
-    // Compact schema keeps the payload under Telegram's 4096-byte sendData limit.
-    const payload = JSON.stringify({
-      type:'vant_daily_report', v:1,
-      report:{n:d.name,d:d.date,g:d.grade,f:d.field,w:d.wakeTime,c:d.focus,m:d.mood,x:d.notes,
-        l:d.lessons.map(item=>({s:item.subject,h:item.hours,q:item.questions,n:item.note}))}
-    });
-    const bytes = new TextEncoder().encode(payload).length;
-    if (bytes > 4096) {
-      showStatus('گزارش برای ارسال مستقیم به ربات بیش از حد حجیمه. یادداشت‌های درس‌ها یا توضیحات رو کوتاه‌تر کن؛ یا تصویر رو دانلود و ارسال کن.',true);
-      return;
-    }
-    try {
-      if (tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') tg.HapticFeedback.impactOccurred('medium');
-      if (typeof tg.disableClosingConfirmation === 'function' && typeof tg.isVersionAtLeast === 'function' && tg.isVersionAtLeast('6.2')) tg.disableClosingConfirmation();
-      tg.sendData(payload);
-    } catch(e) {
-      showStatus('این Mini App باید از دکمهٔ وب‌اپِ کیبورد ربات باز شده باشه تا ارسال مستقیم فعال بشه. برای سایر روش‌های ورود، اتصال بک‌اند لازمه.',true);
-    }
   }
 
   function initializeTelegramMiniApp() {
@@ -443,7 +412,6 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
       if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#f4f6fb');
       if (typeof tg.setBottomBarColor === 'function' && typeof tg.isVersionAtLeast === 'function' && tg.isVersionAtLeast('7.10')) tg.setBottomBarColor('#f4f6fb');
       if (typeof tg.expand === 'function') tg.expand();
-      if (tg.MainButton && typeof tg.MainButton.onClick === 'function') tg.MainButton.onClick(sendReportToBot);
       if (tg.BackButton && typeof tg.BackButton.onClick === 'function') {
         tg.BackButton.onClick(() => {
           const preview = $('previewPanel');
@@ -481,26 +449,58 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     const parsed=parseJalaliDate(d.date); const dateToken=parsed?`${parsed.jy}-${String(parsed.jm).padStart(2,'0')}-${String(parsed.jd).padStart(2,'0')}`:'date';
     return `gozaresh-vant-${clean}-${dateToken}.jpg`;
   }
-  async function downloadReport() {
-    if(!validData()) return;
-    await ensureBrandFont(); renderReport(); const blob=await canvasBlob();
-    if(!blob) { showStatus('ساخت فایل تصویر با مشکل روبه‌رو شد. مرورگر رو به‌روز کن و دوباره امتحان کن.',true); return; }
-    lastBlob=blob;
-    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=safeFilename(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
-    showStatus('تصویر گزارش با موفقیت آماده و دانلود شد. حالا می‌تونی اون رو در پیام‌رسانت ارسال کنی.');
+  function startBlobDownload(blob) {
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download=safeFilename();
+    link.rel='noopener';
+    link.style.display='none';
+    document.body.appendChild(link);
+    // Keep this click synchronous with the user's tap. Telegram's Android WebView
+    // may ignore delayed/synthetic downloads after an awaited Promise.
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
   }
-  async function shareReport() {
+  function downloadReport() {
     if(!validData()) return;
-    await ensureBrandFont(); renderReport(); const blob=lastBlob || await canvasBlob();
-    if(!blob) { showStatus('ساخت تصویر انجام نشد؛ دوباره تلاش کن.',true); return; }
-    lastBlob=blob;
-    const file=new File([blob],safeFilename(),{type:'image/jpeg'});
-    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
-      try { await navigator.share({files:[file],title:'گزارش کار روزانه وانت',text:'گزارش کار روزانه من'}); showStatus('پنجرهٔ اشتراک‌گذاری باز شد. پیام‌رسانت رو انتخاب کن.'); }
-      catch(e) { if(e.name!=='AbortError') showStatus('اشتراک‌گذاری در این مرورگر انجام نشد؛ از دکمهٔ دانلود JPEG استفاده کن.',true); }
-    } else {
-      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=safeFilename(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
-      showStatus('اشتراک‌گذاری مستقیم در این مرورگر پشتیبانی نمی‌شه؛ تصویر دانلود شد تا از گالری ارسالش کنی.');
+    if(!lastBlob) {
+      showStatus('اول «ساخت پیش‌نمایش نهایی» رو بزن؛ بعد دانلود رو انتخاب کن.',true);
+      return;
+    }
+    startBlobDownload(lastBlob);
+    showStatus('درخواست ذخیرهٔ تصویر انجام شد. پوشهٔ Downloads رو بررسی کن.');
+  }
+  function shareReport() {
+    if(!validData()) return;
+    if(!lastBlob) {
+      showStatus('اول «ساخت پیش‌نمایش نهایی» رو بزن؛ بعد اشتراک‌گذاری رو انتخاب کن.',true);
+      return;
+    }
+    if(typeof navigator.share!=='function' || typeof navigator.canShare!=='function' || typeof File!=='function') {
+      startBlobDownload(lastBlob);
+      showStatus('اشتراک‌گذاری مستقیم در این محیط در دسترس نیست؛ تصویر برای ذخیره دانلود شد.');
+      return;
+    }
+    const file=new File([lastBlob],safeFilename(),{type:'image/jpeg'});
+    if(!navigator.canShare({files:[file]})) {
+      startBlobDownload(lastBlob);
+      showStatus('این محیط ارسال مستقیم فایل رو پشتیبانی نمی‌کنه؛ تصویر برای ذخیره دانلود شد.');
+      return;
+    }
+    // Call share() before any await/timer so the user activation is preserved.
+    try {
+      const sharePromise=navigator.share({files:[file],title:'گزارش کار روزانه وانت',text:'گزارش کار روزانه من'});
+      Promise.resolve(sharePromise).then(()=>{
+        showStatus('پنجرهٔ اشتراک‌گذاری باز شد؛ برنامهٔ موردنظرت رو انتخاب کن.');
+      }).catch(error=>{
+        if(error && error.name!=='AbortError') {
+          showStatus('اشتراک‌گذاری انجام نشد؛ دکمهٔ دانلود JPEG رو امتحان کن.',true);
+        }
+      });
+    } catch(error) {
+      showStatus('اشتراک‌گذاری انجام نشد؛ دکمهٔ دانلود JPEG رو امتحان کن.',true);
     }
   }
   function clearForm() {
@@ -516,7 +516,7 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     if(!validData()) return;
     const preview=$('previewPanel'); preview.classList.add('is-visible');
     await ensureBrandFont(); renderReport(); const blob=await canvasBlob();
-    if(blob){lastBlob=blob; updateTelegramControls(); if(isTelegramMiniApp && tg.HapticFeedback && typeof tg.HapticFeedback.notificationOccurred==='function') { try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {} } preview.scrollIntoView({behavior:'smooth',block:'start'}); showStatus('پیش‌نمایش آماده شد؛ می‌تونی گزارش رو برای ربات بفرستی یا تصویرش رو ذخیره کنی.');}
+    if(blob){lastBlob=blob; updateTelegramControls(); if(isTelegramMiniApp && tg.HapticFeedback && typeof tg.HapticFeedback.notificationOccurred==='function') { try { tg.HapticFeedback.notificationOccurred('success'); } catch(e) {} } preview.scrollIntoView({behavior:'smooth',block:'start'}); showStatus('پیش‌نمایش آماده شد؛ حالا می‌تونی عکس رو دانلود یا اشتراک‌گذاری کنی.');}
     else showStatus('ساخت تصویر انجام نشد؛ دوباره تلاش کن.',true);
   });
   $('downloadImage').addEventListener('click',downloadReport);
