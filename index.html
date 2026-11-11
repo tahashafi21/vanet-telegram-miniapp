@@ -479,6 +479,8 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     showStatus('درخواست ذخیرهٔ تصویر انجام شد. پوشهٔ Downloads رو بررسی کن؛ اگر چیزی ذخیره نشد، روی خود عکس چند لحظه نگه دار و «ذخیره تصویر» رو انتخاب کن.');
   }
   function shareReport() {
+    // Immediate visible feedback confirms the tap reached this handler.
+    showStatus('درخواست اشتراک‌گذاری دریافت شد؛ در حال بررسی امکان ارسال عکس…');
     if(!validData()) return;
     if(!lastBlob) {
       showStatus('اول «ساخت پیش‌نمایش نهایی» رو بزن؛ بعد اشتراک‌گذاری رو انتخاب کن.',true);
