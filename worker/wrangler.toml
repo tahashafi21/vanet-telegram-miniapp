@@ -1,7 +1,0 @@
-name = "vant-report-share"
-main = "worker.js"
-compatibility_date = "2026-11-11"
-
-[[r2_buckets]]
-binding = "REPORTS"
-bucket_name = "vant-report-images"
