@@ -44,13 +44,13 @@ async function verifyTelegramInitData(initData, botToken) {
   if (!hash || !/^[a-f0-9]{64}$/i.test(hash)) return null;
   params.delete("hash");
   params.delete("signature");
-  const entries = [...params.entries()].sort(([a], [b]) => a.localeCompare(b));
+  const entries = [...params.entries()].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0);
   const dataCheckString = entries.map(([k, v]) => `${k}=${v}`).join("\n");
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
-    "raw", enc.encode("WebAppData"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+    "raw", enc.encode(botToken), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
   );
-  const secret = await crypto.subtle.sign("HMAC", keyMaterial, enc.encode(botToken));
+  const secret = await crypto.subtle.sign("HMAC", keyMaterial, enc.encode("WebAppData"));
   const hmacKey = await crypto.subtle.importKey(
     "raw", secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
   );
