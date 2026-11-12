@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2055f5">
+<meta name="theme-color" content="#111318">
 <title>گزارش‌یار وانت | گزارش کار روزانه</title>
 <style>
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-Variable-font-face.css');
@@ -61,6 +61,76 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
 .field input,.field select,.field textarea,.lesson-field input{font-size:16px}
 #previewPanel{scroll-margin-top:calc(12px + var(--tg-content-safe-area-inset-top,0px))}
 @media(max-width:600px){.nav{padding-top:calc(13px + max(env(safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px)))}}
+
+/* Vanet charcoal + gold visual system */
+:root{
+  color-scheme:dark;
+  --blue:#252b36;
+  --deep:#1d222c;
+  --yellow:#ddbe68;
+  --red:#e16b70;
+  --ink:#f8f6ef;
+  --muted:#a9afba;
+  --line:rgba(255,255,255,.12);
+  --paper:#191d25;
+  --bg:#111318;
+  --green:#ddbe68;
+}
+body{background:var(--bg);color:#f8f6ef}
+.topbar{background:linear-gradient(135deg,#202630 0%,#111318 82%);border-bottom:3px solid var(--yellow)}
+.topbar:before,.topbar:after{background:#ddbe68;opacity:.09}
+.brand small{color:#a9afba}
+.nav-tag{border-color:rgba(221,190,104,.42);background:rgba(221,190,104,.09);color:#f0d58e}
+.eyebrow{background:#ddbe68;color:#211b0e}
+h1{color:#f8f6ef}
+.hero p{color:#bfc5ce}
+.hero-stamp{color:#f0d58e}
+.hero-stamp span{color:#ddbe68;text-shadow:3px 3px 0 rgba(179,145,61,.35)}
+.panel{background:#191d25;border-color:#343b47;box-shadow:0 12px 34px rgba(0,0,0,.22)}
+.panel-head{border-bottom-color:rgba(255,255,255,.1)}
+.panel-head h2{color:#f8f6ef}
+.panel-head p{color:#a9afba}
+.step-mark{background:rgba(221,190,104,.14);color:#f0d58e}
+.section-label{color:#f1eee6}
+.section-label:before{background:#ddbe68;box-shadow:none}
+.field label{color:#c0c5ce}
+.field input,.field select,.field textarea,.lesson-field input{
+  border-color:#3b424e;background:#11161e;color:#f8f6ef;
+}
+.field input::placeholder,.field textarea::placeholder,.lesson-field input::placeholder{color:#737d8c}
+.field input:focus,.field select:focus,.field textarea:focus,.lesson-field input:focus{
+  border-color:#ddbe68;box-shadow:0 0 0 3px rgba(221,190,104,.13);background:#151a22;
+}
+.helper{color:#929aa7}
+.lesson{border-color:#363e49;background:#202630}
+.lesson-title{color:#f3f0e8}
+.lesson-index{background:#ddbe68;color:#211b0e}
+.remove-lesson{background:rgba(225,107,112,.12);color:#ff9699}
+.lesson-field label{color:#a9afba}
+.lesson-field input{background:#11161e}
+.add-button{border:1px dashed rgba(221,190,104,.55);background:rgba(221,190,104,.08);color:#f0d58e}
+.add-button:hover{background:rgba(221,190,104,.15);border-color:#ddbe68}
+.divider{background:rgba(255,255,255,.1)}
+.btn-primary,.btn-yellow{background:#ddbe68;color:#211b0e;box-shadow:0 5px 0 #866a33}
+.btn-secondary{background:#303743;color:#ece9e1}
+.btn:focus-visible{outline:3px solid #f0d58e;outline-offset:2px}
+.live-pill{color:#f0d58e;background:rgba(221,190,104,.12)}
+.live-pill:before{background:#ddbe68}
+.preview-caption{color:#a9afba}
+.preview-wrap{background:linear-gradient(140deg,#202630,#151920)}
+#reportCanvas,#reportImageView{box-shadow:0 12px 30px rgba(0,0,0,.32);background:#111318}
+.hint{color:#929aa7}
+.status{background:rgba(221,190,104,.13);color:#f0d58e}
+.status.error{background:rgba(225,107,112,.13);color:#ff9a9d}
+.today-button{border-color:rgba(221,190,104,.45);background:rgba(221,190,104,.1);color:#f0d58e}
+.today-button:hover{background:rgba(221,190,104,.18)}
+.workflow-note{background:rgba(221,190,104,.075);border-color:rgba(221,190,104,.24);color:#d7d1c3}
+.workflow-note strong{color:#f0d58e}
+.workflow-icon{background:#ddbe68;color:#211b0e}
+.footer-note{color:#929aa7}
+.footer-note strong{color:#f0d58e}
+.preview-panel .panel-head{background:#191d25}
+
 </style>
   <script src="https://telegram.org/js/telegram-web-app.js?65"></script>
 </head>
@@ -291,70 +361,70 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     const height=Math.max(1350,notesTop+36+notesHeight+150);
     canvas.width=1080; canvas.height=height;
     const c=canvas.getContext('2d');
-    c.fillStyle='#2055f5'; c.fillRect(0,0,1080,height);
-    // Dynamic motion shapes in brand colours.
-    c.save(); c.globalAlpha=.22; c.fillStyle='#0a2fb9'; c.beginPath(); c.moveTo(0,0); c.lineTo(330,0); c.lineTo(0,300); c.closePath(); c.fill(); c.beginPath(); c.moveTo(1080,160); c.lineTo(1080,560); c.lineTo(800,560); c.closePath(); c.fill(); c.restore();
-    lightning(c,965,90,2.7,'#fff21a'); lightning(c,55,height-170,2.1,'#fa2344');
-    roundedRect(c,34,32,1012,height-64,38,'#fff',null);
+    c.fillStyle='#111318'; c.fillRect(0,0,1080,height);
+    // Subtle geometric shapes in the charcoal and gold palette.
+    c.save(); c.globalAlpha=.12; c.fillStyle='#ddbe68'; c.beginPath(); c.moveTo(0,0); c.lineTo(330,0); c.lineTo(0,300); c.closePath(); c.fill(); c.beginPath(); c.moveTo(1080,160); c.lineTo(1080,560); c.lineTo(800,560); c.closePath(); c.fill(); c.restore();
+    lightning(c,965,90,2.7,'#ddbe68'); lightning(c,55,height-170,2.1,'#b88f45');
+    roundedRect(c,34,32,1012,height-64,38,'#191d25','#343b47',2);
     // Header
-    roundedRect(c,54,52,972,228,30,'#2055f5',null);
-    c.save(); c.globalAlpha=.18; c.fillStyle='#071c76'; c.beginPath(); c.moveTo(560,52); c.lineTo(730,52); c.lineTo(650,280); c.lineTo(480,280); c.closePath(); c.fill(); c.restore();
-    lightning(c,875,77,1.7,'#fff21a');
+    roundedRect(c,54,52,972,228,30,'#202630',null);
+    c.save(); c.globalAlpha=.16; c.fillStyle='#ddbe68'; c.beginPath(); c.moveTo(560,52); c.lineTo(730,52); c.lineTo(650,280); c.lineTo(480,280); c.closePath(); c.fill(); c.restore();
+    lightning(c,875,77,1.7,'#ddbe68');
     // Standalone transparent logo: no enclosing square or circle.
     if (logo.complete && logo.naturalWidth) { c.drawImage(logo,58,63,208,197); }
-    text(c,'گروه آموزشی',976,105,29,'#e7edff',700,'right');
-    text(c,'وانت',976,159,66,'#fff21a',900,'right');
-    text(c,'گزارش کار روزانه',976,222,29,'#fff',800,'right');
+    text(c,'گروه آموزشی',976,105,29,'#c6cbd2',700,'right');
+    text(c,'وانت',976,159,66,'#f0d58e',900,'right');
+    text(c,'گزارش کار روزانه',976,222,29,'#f8f6ef',800,'right');
     // Student detail panel
-    roundedRect(c,62,302,956,119,20,'#fff','#e0e7ff',2);
-    text(c,'دانش‌آموز',982,329,18,'#6f7891',700,'right');
-    fittedText(c,d.name || 'نام دانش‌آموز',982,371,274,29,16,d.name?'#11131c':'#9ba2b6',900);
-    c.strokeStyle='#e2e7f2'; c.lineWidth=2; c.beginPath(); c.moveTo(674,320); c.lineTo(674,403); c.moveTo(370,320); c.lineTo(370,403); c.stroke();
-    text(c,'پایه و رشته',645,329,17,'#6f7891',700,'right');
-    fittedText(c,`${d.grade} · ${d.field}`,645,371,250,22,13,'#171b29',800);
-    text(c,'تاریخ گزارش',342,329,17,'#6f7891',700,'right');
-    fittedText(c,dateFa(d.date),342,371,252,21,14,'#171b29',800);
+    roundedRect(c,62,302,956,119,20,'#222833','#3b424e',2);
+    text(c,'دانش‌آموز',982,329,18,'#a9afba',700,'right');
+    fittedText(c,d.name || 'نام دانش‌آموز',982,371,274,29,16,d.name?'#f8f6ef':'#929aa7',900);
+    c.strokeStyle='#3b424e'; c.lineWidth=2; c.beginPath(); c.moveTo(674,320); c.lineTo(674,403); c.moveTo(370,320); c.lineTo(370,403); c.stroke();
+    text(c,'پایه و رشته',645,329,17,'#a9afba',700,'right');
+    fittedText(c,`${d.grade} · ${d.field}`,645,371,250,22,13,'#f1eee6',800);
+    text(c,'تاریخ گزارش',342,329,17,'#a9afba',700,'right');
+    fittedText(c,dateFa(d.date),342,371,252,21,14,'#f1eee6',800);
     // Statistics tiles
     const stats=[
-      {x:62,w:222,label:'مجموع مطالعه',value:fmtHours(d.totalMinutes),color:'#2055f5'},
-      {x:300,w:222,label:'تعداد تست',value:fa(d.totalQuestions),color:'#fa2344'},
-      {x:538,w:222,label:'تعداد درس',value:fa(d.namedLessons),color:'#f0c900'},
-      {x:776,w:242,label:'ساعت بیدارشدن',value:d.wakeTime,color:'#141720'}
+      {x:62,w:222,label:'مجموع مطالعه',value:fmtHours(d.totalMinutes),color:'#ddbe68'},
+      {x:300,w:222,label:'تعداد تست',value:fa(d.totalQuestions),color:'#b88f45'},
+      {x:538,w:222,label:'تعداد درس',value:fa(d.namedLessons),color:'#f0d58e'},
+      {x:776,w:242,label:'ساعت بیدارشدن',value:d.wakeTime,color:'#7e8795'}
     ];
     for(const s of stats){
-      roundedRect(c,s.x,441,s.w,125,18,'#fbfcff','#e5e9f4',2);
+      roundedRect(c,s.x,441,s.w,125,18,'#222833','#3b424e',2);
       roundedRect(c,s.x+12,454,7,98,4,s.color,null);
-      text(c,s.label,s.x+s.w-20,469,18,'#747b90',700,'right');
-      fittedText(c,s.value,s.x+s.w-20,520,s.w-42,28,15,'#11131c',900);
+      text(c,s.label,s.x+s.w-20,469,18,'#a9afba',700,'right');
+      fittedText(c,s.value,s.x+s.w-20,520,s.w-42,28,15,'#f8f6ef',900);
     }
-    text(c,'کارهایی که امروز انجام دادی',1015,610,27,'#151827',900,'right');
-    roundedRect(c,62,632,120,4,2,'#fff21a',null);
+    text(c,'کارهایی که امروز انجام دادی',1015,610,27,'#f8f6ef',900,'right');
+    roundedRect(c,62,632,120,4,2,'#ddbe68',null);
     const lessonsToDraw = d.lessons.length ? d.lessons : [{subject:'نام درس را وارد کن',hours:0,questions:0,note:''}];
     lessonsToDraw.forEach((l,i)=>{
       const y=rowStart+i*rowStep;
-      roundedRect(c,62,y,956,rowHeight,17,'#f8faff','#e2e8f8',2);
-      roundedRect(c,78,y+16,48,48,14,i%2===0?'#2055f5':'#fa2344',null);
-      text(c,fa(i+1),102,y+40,22,'#fff',900,'center');
+      roundedRect(c,62,y,956,rowHeight,17,'#202630','#3b424e',2);
+      roundedRect(c,78,y+16,48,48,14,i%2===0?'#ddbe68':'#b88f45',null);
+      text(c,fa(i+1),102,y+40,22,'#211b0e',900,'center');
       const subject = l.subject || 'نام درس';
-      fittedText(c,subject,987,y+28,835,25,17,l.subject?'#151827':'#9ba2b6',900);
+      fittedText(c,subject,987,y+28,835,25,17,l.subject?'#f8f6ef':'#929aa7',900);
       const detail=`زمان مطالعه: ${durationLabel(l.hours)}   ·   تست: ${fa(l.questions)}`;
-      text(c,detail,987,y+69,18,'#5f6880',600,'right');
-      if(l.note) fittedText(c,l.note,987,y+92,850,15,11,'#2055f5',700);
+      text(c,detail,987,y+69,18,'#b4bbc5',600,'right');
+      if(l.note) fittedText(c,l.note,987,y+92,850,15,11,'#f0d58e',700);
     });
     // Focus and daily notes
     let y=notesTop;
-    text(c,'یادداشت و جمع‌بندی روز',1015,y,25,'#151827',900,'right');
-    text(c,`تمرکز ${fa(d.focus)} از ۵  ·  ${d.mood}`,75,y,18,'#2055f5',800,'left');
+    text(c,'یادداشت و جمع‌بندی روز',1015,y,25,'#f8f6ef',900,'right');
+    text(c,`تمرکز ${fa(d.focus)} از ۵  ·  ${d.mood}`,75,y,18,'#f0d58e',800,'left');
     y+=23;
-    roundedRect(c,62,y,956,notesHeight,18,'#fffdf0','#f1e8a2',2);
+    roundedRect(c,62,y,956,notesHeight,18,'#222833','#8c7548',2);
     const noteLines=wrappedLines(c,notesText,875,22,500,5);
-    noteLines.forEach((line,i)=>text(c,line,982,y+34+i*34,22,'#373849',500,'right'));
+    noteLines.forEach((line,i)=>text(c,line,982,y+34+i*34,22,'#ece7db',500,'right'));
     // Footer bar at the bottom of the printable page
     const footerY=height-104;
-    roundedRect(c,62,footerY,956,62,17,'#2055f5',null);
-    lightning(c,91,footerY+10,1.05,'#fff21a');
-    text(c,'گروه آموزشی وانت',540,footerY+31,23,'#fff',900,'center');
-    text(c,'گزارش‌یار وانت',1000,height-54,13,'#5f78d0',700,'right');
+    roundedRect(c,62,footerY,956,62,17,'#202630',null);
+    lightning(c,91,footerY+10,1.05,'#ddbe68');
+    text(c,'گروه آموزشی وانت',540,footerY+31,23,'#f8f6ef',900,'center');
+    text(c,'گزارش‌یار وانت',1000,height-54,13,'#bda36c',700,'right');
     lastBlob=null;
     if (previewImageUrl) { URL.revokeObjectURL(previewImageUrl); previewImageUrl=null; }
     const imageView=$('reportImageView');
@@ -414,9 +484,9 @@ body{min-height:100vh;min-height:var(--tg-viewport-stable-height,100dvh);padding
     if (!isTelegramMiniApp || !tg) return;
     document.documentElement.classList.add('telegram-mini-app');
     try {
-      if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#2055f5');
-      if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#f4f6fb');
-      if (typeof tg.setBottomBarColor === 'function' && typeof tg.isVersionAtLeast === 'function' && tg.isVersionAtLeast('7.10')) tg.setBottomBarColor('#f4f6fb');
+      if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#111318');
+      if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#111318');
+      if (typeof tg.setBottomBarColor === 'function' && typeof tg.isVersionAtLeast === 'function' && tg.isVersionAtLeast('7.10')) tg.setBottomBarColor('#111318');
       if (typeof tg.expand === 'function') tg.expand();
       if (tg.BackButton && typeof tg.BackButton.onClick === 'function') {
         tg.BackButton.onClick(() => {
